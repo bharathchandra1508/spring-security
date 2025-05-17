@@ -11,14 +11,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
-@Profile("!prod")
-public class HotelBackendUsernamePwdAuthenticationProvider implements AuthenticationProvider
+@Profile("prod")
+public class HotelBackendProdUsernamePwdAuthenticationProvider implements AuthenticationProvider
 {
 
     private final HotelBackendUserDetailsService hotelBackendUserDetailsService;
     private final PasswordEncoder passwordEncoder;
 
-    public HotelBackendUsernamePwdAuthenticationProvider(HotelBackendUserDetailsService hotelBackendUserDetailsService, PasswordEncoder passwordEncoder)
+    public HotelBackendProdUsernamePwdAuthenticationProvider(HotelBackendUserDetailsService hotelBackendUserDetailsService, PasswordEncoder passwordEncoder)
     {
         this.hotelBackendUserDetailsService = hotelBackendUserDetailsService;
         this.passwordEncoder = passwordEncoder;
@@ -30,7 +30,14 @@ public class HotelBackendUsernamePwdAuthenticationProvider implements Authentica
         String username = authentication.getName();
         String pwd = authentication.getCredentials().toString();
         UserDetails userDetails = hotelBackendUserDetailsService.loadUserByUsername(username);
-        return new UsernamePasswordAuthenticationToken(username,pwd,userDetails.getAuthorities());
+        if(passwordEncoder.matches(pwd, userDetails.getPassword()))
+        {
+            return new UsernamePasswordAuthenticationToken(username,pwd,userDetails.getAuthorities());
+        }
+        else
+        {
+            throw new BadCredentialsException("Invalid Password");
+        }
     }
 
     @Override
