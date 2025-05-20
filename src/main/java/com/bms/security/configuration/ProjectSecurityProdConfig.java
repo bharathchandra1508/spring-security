@@ -27,7 +27,7 @@ public class ProjectSecurityProdConfig
         http.requiresChannel(rcc -> rcc.anyRequest().requiresSecure());
         http.csrf(csrfConfig -> csrfConfig.disable());
         http.authorizeHttpRequests((requests) -> requests
-                            .requestMatchers("/myAccount","/myBalance","/myLoans","/myCards").authenticated()
+                            .requestMatchers("/myAccount","/myBalance","/myLoans","/myCards","/user").authenticated()
                             .requestMatchers("/notices","/contact","/error","/register","/invalidSession").permitAll());
         http.formLogin(withDefaults());
         http.httpBasic(hbc -> hbc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));
