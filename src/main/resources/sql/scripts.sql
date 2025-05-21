@@ -178,3 +178,13 @@ CREATE TABLE `contact_messages` (
   `create_dt` date DEFAULT NULL,
   PRIMARY KEY (`contact_id`)
 );
+
+create table `authorities` (
+	`id` int NOT NULL AUTO_INCREMENT,
+	`customer_id` int NOT NULL,
+	`name` varchar(50) not null,
+	primary key (`id`),
+	key `customer_id` (`customer_id`),
+	constraint `authorities_ibfk_1` foreign key (`customer_id`) references `customer` (`customer_id`)
+);
+

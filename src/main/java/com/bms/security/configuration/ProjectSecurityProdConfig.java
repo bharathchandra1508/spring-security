@@ -53,7 +53,11 @@ public class ProjectSecurityProdConfig
                 .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class);
         http.requiresChannel(rcc -> rcc.anyRequest().requiresSecure());
         http.authorizeHttpRequests((requests) -> requests
-                            .requestMatchers("/myAccount","/myBalance","/myLoans","/myCards","/user").authenticated()
+                            .requestMatchers("/myAccount").hasAuthority("VIEWACCOUNT")
+                            .requestMatchers("/myBalance").hasAuthority("VIEWBALANCE")
+                            .requestMatchers("/myLoans").hasAuthority("VIEWLOANS")
+                            .requestMatchers("/myCards").hasAuthority("VIEWCARDS")
+                            .requestMatchers("/user").authenticated()
                             .requestMatchers("/notices","/contact","/error","/register","/invalidSession").permitAll());
         http.formLogin(withDefaults());
         http.httpBasic(hbc -> hbc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));
