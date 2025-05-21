@@ -55,10 +55,10 @@ public class ProjectSecurityConfig
                     }
                 }))
                 .csrf(csrfConfig -> csrfConfig.csrfTokenRequestHandler(csrfTokenRequestAttributeHandler)
+                        .ignoringRequestMatchers("/contact","/register")
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
                 .requiresChannel(rcc -> rcc.anyRequest().requiresInsecure())
-                .csrf(csrfConfig -> csrfConfig.disable())
                 .authorizeHttpRequests((requests) -> requests
                             .requestMatchers("/myAccount","/myBalance","/myLoans","/myCards","/user").authenticated()
                             .requestMatchers("/notices","/contact","/error","/register","/invalidSession").permitAll());
