@@ -2,7 +2,10 @@ package com.bms.security.configuration;
 
 import com.bms.security.exception.CustomAccessDeniedHandler;
 import com.bms.security.exception.CustomBasicAuthenticationEntryPoint;
+import com.bms.security.filter.AuthoritiesLoggingAfterFilter;
+import com.bms.security.filter.AuthoritiesLoggingAtFilter;
 import com.bms.security.filter.CsrfCookieFilter;
+import com.bms.security.filter.RequestValidationBeforeFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -58,6 +61,9 @@ public class ProjectSecurityConfig
                         .ignoringRequestMatchers("/contact","/register")
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
+                .addFilterBefore(new RequestValidationBeforeFilter(), BasicAuthenticationFilter.class)
+                .addFilterAfter(new AuthoritiesLoggingAfterFilter(), BasicAuthenticationFilter.class)
+                .addFilterAt(new AuthoritiesLoggingAtFilter(), BasicAuthenticationFilter.class)
                 .requiresChannel(rcc -> rcc.anyRequest().requiresInsecure())
                 .authorizeHttpRequests((requests) -> requests
                             /*.requestMatchers("/myAccount").hasAuthority("VIEWACCOUNT")
