@@ -2,10 +2,7 @@ package com.bms.security.configuration;
 
 import com.bms.security.exception.CustomAccessDeniedHandler;
 import com.bms.security.exception.CustomBasicAuthenticationEntryPoint;
-import com.bms.security.filter.AuthoritiesLoggingAfterFilter;
-import com.bms.security.filter.AuthoritiesLoggingAtFilter;
-import com.bms.security.filter.CsrfCookieFilter;
-import com.bms.security.filter.RequestValidationBeforeFilter;
+import com.bms.security.filter.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +20,7 @@ import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 import static org.springframework.security.config.Customizer.withDefaults;
@@ -37,8 +35,7 @@ public class ProjectSecurityProdConfig
         // http.authorizeHttpRequests((requests) -> requests.anyRequest().permitAll());
         // http.authorizeHttpRequests((requests) -> requests.anyRequest().denyAll());
         CsrfTokenRequestAttributeHandler csrfTokenRequestAttributeHandler = new CsrfTokenRequestAttributeHandler();
-        http.securityContext(contextConfig -> contextConfig.requireExplicitSave(false))
-                .sessionManagement(sessionConfig -> sessionConfig.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
+        http.sessionManagement(sessionConfig -> sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .cors(corsConfig -> corsConfig.configurationSource(new CorsConfigurationSource() {
             @Override
             public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
@@ -47,6 +44,7 @@ public class ProjectSecurityProdConfig
                 config.setAllowedMethods(Collections.singletonList("*"));
                 config.setAllowCredentials(true);
                 config.setAllowedHeaders(Collections.singletonList("*"));
+                config.setExposedHeaders(Arrays.asList("Authorization"));
                 config.setMaxAge(3600L);
                 return config;
             }
@@ -56,7 +54,9 @@ public class ProjectSecurityProdConfig
                 .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
                 .addFilterBefore(new RequestValidationBeforeFilter(), BasicAuthenticationFilter.class)
                 .addFilterAfter(new AuthoritiesLoggingAfterFilter(), BasicAuthenticationFilter.class)
-                .addFilterAt(new AuthoritiesLoggingAtFilter(), BasicAuthenticationFilter.class);
+                .addFilterAt(new AuthoritiesLoggingAtFilter(), BasicAuthenticationFilter.class)
+                .addFilterAfter(new JWTTokenGeneratorFilter(), BasicAuthenticationFilter.class)
+                .addFilterBefore(new JWTTokenValidatorFilter(), BasicAuthenticationFilter.class);
         http.requiresChannel(rcc -> rcc.anyRequest().requiresSecure());
         http.authorizeHttpRequests((requests) -> requests
                             /*.requestMatchers("/myAccount").hasAuthority("VIEWACCOUNT")
